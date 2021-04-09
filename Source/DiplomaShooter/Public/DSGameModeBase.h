@@ -14,4 +14,7 @@ class DIPLOMASHOOTER_API ADSGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 	
+public:
+    ADSGameModeBase();
+
 };
