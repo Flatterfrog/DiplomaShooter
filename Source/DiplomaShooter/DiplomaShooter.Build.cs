@@ -12,7 +12,7 @@ public class DiplomaShooter : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
-		PublicIncludePaths.AddRange(new string[] { "DiplomaShooter/Public/Player" });
+		PublicIncludePaths.AddRange(new string[] { "DiplomaShooter/Public/Player", "DiplomaShooter/Public/Components" });
 
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
