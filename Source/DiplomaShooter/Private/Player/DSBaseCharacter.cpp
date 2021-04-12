@@ -6,6 +6,10 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "..\..\Public\Player\DSBaseCharacter.h"
 #include "Components/DSCharacterMovementComponent.h"
+#include "Components/DSHealthComponent.h"
+#include "Components/TextRenderComponent.h"
+
+DEFINE_LOG_CATEGORY_STATIC(BaseCharacterLog, All, All);
 
 // Sets default values
 ADSBaseCharacter::ADSBaseCharacter(const FObjectInitializer& ObjInit)
@@ -21,19 +25,33 @@ ADSBaseCharacter::ADSBaseCharacter(const FObjectInitializer& ObjInit)
 
     CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
     CameraComponent->SetupAttachment(SpringArmComponent);
+
+    HealthComponent = CreateDefaultSubobject<UDSHealthComponent>("HealthComponent");
+    
+    HealthTextComponent = CreateDefaultSubobject<UTextRenderComponent>("HealthTextComponent");
+    HealthTextComponent->SetupAttachment(GetRootComponent());
 }
 
 // Called when the game starts or when spawned
 void ADSBaseCharacter::BeginPlay()
 {
     Super::BeginPlay();
+
+    check(HealthComponent);
+    check(HealthTextComponent);
 }
 
 // Called every frame
 void ADSBaseCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+    
+    const auto Health = HealthComponent->GetHealth();
+    HealthTextComponent->SetText(FText::FromString(FString::Printf(TEXT("%.0f"), Health)));
+
+    TakeDamage(0.1f, FDamageEvent{}, Controller, this);
 }
+
 
 // Called to bind functionality to input
 void ADSBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

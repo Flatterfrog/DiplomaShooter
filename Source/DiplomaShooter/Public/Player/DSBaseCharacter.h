@@ -8,6 +8,8 @@
 
 class UCameraComponent;
 class USpringArmComponent;
+class UDSHealthComponent;
+class UTextRenderComponent;
 
 UCLASS()
 class DIPLOMASHOOTER_API ADSBaseCharacter : public ACharacter
@@ -25,7 +27,13 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     UCameraComponent* CameraComponent;
-	// Called when the game starts or when spawned
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+    UDSHealthComponent* HealthComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+    UTextRenderComponent* HealthTextComponent;
+
 	virtual void BeginPlay() override;
 
 public:	
@@ -50,4 +58,6 @@ public:
 
 	void OnStartRunning();
     void OnStopRunning();
+
+	
 };
