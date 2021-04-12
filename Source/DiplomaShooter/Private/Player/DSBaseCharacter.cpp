@@ -39,15 +39,23 @@ void ADSBaseCharacter::BeginPlay()
 
     check(HealthComponent);
     check(HealthTextComponent);
+    check(GetCharacterMovement());
+
+    OnHealthChanged(HealthComponent->GetHealth());
+    HealthComponent->OnDeath.AddUObject(this, &ADSBaseCharacter::OnDeath);
+    HealthComponent->OnHealthChanged.AddUObject(this, &ADSBaseCharacter::OnHealthChanged);
+}
+
+void ADSBaseCharacter::OnHealthChanged(float Health) 
+{
+    HealthTextComponent->SetText(FText::FromString(FString::Printf(TEXT("%.0f"), Health)));
+
 }
 
 // Called every frame
 void ADSBaseCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
-    
-    const auto Health = HealthComponent->GetHealth();
-    HealthTextComponent->SetText(FText::FromString(FString::Printf(TEXT("%.0f"), Health)));
 }
 
 
@@ -100,4 +108,15 @@ void ADSBaseCharacter::OnStartRunning()
 void ADSBaseCharacter::OnStopRunning() 
 {
     WantsToRun = false;
+}
+
+void ADSBaseCharacter::OnDeath() 
+{
+    UE_LOG(BaseCharacterLog, Display, TEXT("Player %s is dead"), *GetName());
+
+    PlayAnimMontage(DeathAnimMontage);
+
+    GetCharacterMovement()->DisableMovement();
+
+    SetLifeSpan(5.0f);
 }

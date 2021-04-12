@@ -2,8 +2,6 @@
 
 #include "Components/DSHealthComponent.h"
 #include "GameFramework/Actor.h"
-#include "Dev/DSIceDamageType.h"
-#include "Dev/DSFireDamageType.h"
 
 UDSHealthComponent::UDSHealthComponent()
 {
@@ -16,6 +14,7 @@ void UDSHealthComponent::BeginPlay()
     Super::BeginPlay();
 
     Health = MaxHealth;
+    OnHealthChanged.Broadcast(Health);
 
     AActor* ComponentOwner = GetOwner();
     if (ComponentOwner)
@@ -27,17 +26,14 @@ void UDSHealthComponent::BeginPlay()
 void UDSHealthComponent::OnTakeAnyDamage(
     AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
 {
-    Health -= Damage;
 
-    if (DamageType)
+    if (Damage <= 0.0f || IsDead()) return;
+
+    Health =FMath::Clamp(Health - Damage, 0.0f, MaxHealth);
+    OnHealthChanged.Broadcast(Health);
+
+    if (IsDead())
     {
-        if (DamageType->IsA<UDSFireDamageType>())
-        {
-            UE_LOG(LogTemp, Display, TEXT("Soo hooot !!!"));
-        }
-        else if (DamageType->IsA<UDSIceDamageType>())
-        {
-            UE_LOG(LogTemp, Display, TEXT("Soo coold !!!"));
-        }
+        OnDeath.Broadcast();
     }
 }
