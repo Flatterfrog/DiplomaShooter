@@ -10,6 +10,7 @@ class UCameraComponent;
 class USpringArmComponent;
 class UDSHealthComponent;
 class UTextRenderComponent;
+class ADSBaseWeapon;
 
 UCLASS()
 class DIPLOMASHOOTER_API ADSBaseCharacter : public ACharacter
@@ -46,6 +47,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
     FVector2D LandedDamage = FVector2D(10.0f, 100.0f);
 
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+    TSubclassOf<ADSBaseWeapon> WeaponClass;
+
 	virtual void BeginPlay() override;
 
 public:	
@@ -74,4 +78,6 @@ public:
 
     UFUNCTION()
     void OnGroundLanded(const FHitResult& Hit);
+
+	void SpawnWeapon();
 };

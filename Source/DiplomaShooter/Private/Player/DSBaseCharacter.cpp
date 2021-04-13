@@ -9,6 +9,7 @@
 #include "Components/DSHealthComponent.h"
 #include "Components/TextRenderComponent.h"
 #include "GameFramework/Controller.h"
+#include "Weapon/DSBaseWeapon.h"
 
 DEFINE_LOG_CATEGORY_STATIC(BaseCharacterLog, All, All);
 
@@ -22,7 +23,7 @@ ADSBaseCharacter::ADSBaseCharacter(const FObjectInitializer& ObjInit)
     SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>("SpringArmComponent");
     SpringArmComponent->SetupAttachment(GetRootComponent());
     SpringArmComponent->bUsePawnControlRotation = true;
-
+    SpringArmComponent->SocketOffset = FVector(0.0f, 100.0f, 80.0f);
 
     CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
     CameraComponent->SetupAttachment(SpringArmComponent);
@@ -31,6 +32,7 @@ ADSBaseCharacter::ADSBaseCharacter(const FObjectInitializer& ObjInit)
     
     HealthTextComponent = CreateDefaultSubobject<UTextRenderComponent>("HealthTextComponent");
     HealthTextComponent->SetupAttachment(GetRootComponent());
+    HealthTextComponent->SetOwnerNoSee(true);
 }
 
 // Called when the game starts or when spawned
@@ -47,6 +49,8 @@ void ADSBaseCharacter::BeginPlay()
     HealthComponent->OnHealthChanged.AddUObject(this, &ADSBaseCharacter::OnHealthChanged);
 
     LandedDelegate.AddDynamic(this, &ADSBaseCharacter::OnGroundLanded);
+
+    SpawnWeapon();
 }
 
 void ADSBaseCharacter::OnHealthChanged(float Health) 
@@ -135,4 +139,15 @@ void ADSBaseCharacter::OnGroundLanded(const FHitResult& Hit)
     if (FallVelocityZ < LandedDamageVelocity.X) return;
     const auto FinalDamage = FMath::GetMappedRangeValueClamped(LandedDamageVelocity, LandedDamage, FallVelocityZ);
     TakeDamage(FinalDamage, FDamageEvent{}, nullptr, nullptr);
+}
+
+void ADSBaseCharacter::SpawnWeapon()
+{
+    if (!GetWorld()) return;
+    const auto Weapon = GetWorld()->SpawnActor<ADSBaseWeapon>(WeaponClass);
+    if (Weapon)
+    {
+        FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, false); // привязываем оружие к мешу персонажа
+        Weapon->AttachToComponent(GetMesh(), AttachmentRules, "WeaponPoint");
+    }
 }
