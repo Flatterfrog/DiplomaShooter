@@ -45,6 +45,8 @@ void ADSBaseCharacter::BeginPlay()
     OnHealthChanged(HealthComponent->GetHealth());
     HealthComponent->OnDeath.AddUObject(this, &ADSBaseCharacter::OnDeath);
     HealthComponent->OnHealthChanged.AddUObject(this, &ADSBaseCharacter::OnHealthChanged);
+
+    LandedDelegate.AddDynamic(this, &ADSBaseCharacter::OnGroundLanded);
 }
 
 void ADSBaseCharacter::OnHealthChanged(float Health) 
@@ -64,6 +66,7 @@ void ADSBaseCharacter::Tick(float DeltaTime)
 void ADSBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
     Super::SetupPlayerInputComponent(PlayerInputComponent);
+    check(PlayerInputComponent);
     PlayerInputComponent->BindAxis("MoveForward", this, &ADSBaseCharacter::MoveForward);
     PlayerInputComponent->BindAxis("MoveRight", this, &ADSBaseCharacter::MoveRight);
     PlayerInputComponent->BindAxis("LookUp", this, &ADSBaseCharacter::AddControllerPitchInput);
@@ -119,9 +122,17 @@ void ADSBaseCharacter::OnDeath()
 
     GetCharacterMovement()->DisableMovement();
 
-    SetLifeSpan(5.0f);
+    SetLifeSpan(LifeSpanOnDeath);
     if (Controller)
     {
         Controller->ChangeState(NAME_Spectating);
     }
+}
+
+void ADSBaseCharacter::OnGroundLanded(const FHitResult& Hit)
+{
+    const auto FallVelocityZ = -GetVelocity().Z;
+    if (FallVelocityZ < LandedDamageVelocity.X) return;
+    const auto FinalDamage = FMath::GetMappedRangeValueClamped(LandedDamageVelocity, LandedDamage, FallVelocityZ);
+    TakeDamage(FinalDamage, FDamageEvent{}, nullptr, nullptr);
 }
