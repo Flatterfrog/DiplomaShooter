@@ -2,7 +2,8 @@
 
 #include "Components/DSHealthComponent.h"
 #include "GameFramework/Actor.h"
-
+#include "Engine/World.h"
+#include "TimerManager.h"
 UDSHealthComponent::UDSHealthComponent()
 {
 
@@ -13,8 +14,7 @@ void UDSHealthComponent::BeginPlay()
 {
     Super::BeginPlay();
 
-    Health = MaxHealth;
-    OnHealthChanged.Broadcast(Health);
+    SetHealth(MaxHealth);
 
     AActor* ComponentOwner = GetOwner();
     if (ComponentOwner)
@@ -27,13 +27,34 @@ void UDSHealthComponent::OnTakeAnyDamage(
     AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
 {
 
-    if (Damage <= 0.0f || IsDead()) return;
+    if (Damage <= 0.0f || IsDead() || !GetWorld()) return;
 
-    Health =FMath::Clamp(Health - Damage, 0.0f, MaxHealth);
-    OnHealthChanged.Broadcast(Health);
+    SetHealth(Health - Damage);
+    GetWorld()->GetTimerManager().ClearTimer(HealTimerHandle);
 
     if (IsDead())
     {
         OnDeath.Broadcast();
     }
+    else if (AutoHeal && GetWorld())
+    {
+        GetWorld()->GetTimerManager().SetTimer(HealTimerHandle, this, &UDSHealthComponent::HealUpdate, HealUpdateTime, true, HealDelay);
+    }
 }
+
+void UDSHealthComponent::HealUpdate() 
+{
+    SetHealth(Health + HealModifier);
+
+    if (FMath::IsNearlyEqual(Health, MaxHealth) && GetWorld())
+    {
+        GetWorld()->GetTimerManager().ClearTimer(HealTimerHandle);
+    }
+}
+
+void UDSHealthComponent::SetHealth(float NewHealth) 
+{
+    Health = FMath::Clamp(NewHealth, 0.0f, MaxHealth);
+    OnHealthChanged.Broadcast(Health);
+}
+

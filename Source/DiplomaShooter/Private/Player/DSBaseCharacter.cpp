@@ -8,6 +8,7 @@
 #include "Components/DSCharacterMovementComponent.h"
 #include "Components/DSHealthComponent.h"
 #include "Components/TextRenderComponent.h"
+#include "GameFramework/Controller.h"
 
 DEFINE_LOG_CATEGORY_STATIC(BaseCharacterLog, All, All);
 
@@ -119,4 +120,8 @@ void ADSBaseCharacter::OnDeath()
     GetCharacterMovement()->DisableMovement();
 
     SetLifeSpan(5.0f);
+    if (Controller)
+    {
+        Controller->ChangeState(NAME_Spectating);
+    }
 }
