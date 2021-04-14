@@ -7,32 +7,41 @@
 #include "DSWeaponComponent.generated.h"
 
 class ADSBaseWeapon;
-	
+
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class DIPLOMASHOOTER_API UDSWeaponComponent : public UActorComponent
 {
-	GENERATED_BODY()
-	
-public:	
-	UDSWeaponComponent();
+    GENERATED_BODY()
 
-	void StartFire();
-	void StopFire();
+public:
+    UDSWeaponComponent();
+
+    void StartFire();
+    void StopFire();
+    void NextWeapon();
 
 protected:
-	
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-    FName WeaponAttachPointName = "WeaponPoint";
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+    FName WeaponEquipSocketName = "WeaponSocket";
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-    TSubclassOf<ADSBaseWeapon> WeaponClass;
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+    FName WeaponArmorySocketName = "ArmorySocket";
 
-	virtual void BeginPlay() override;
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+    TArray<TSubclassOf<ADSBaseWeapon>> WeaponClasses;
 
-	private:
+    virtual void BeginPlay() override;
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
+private:
     UPROPERTY()
     ADSBaseWeapon* CurrentWeapon = nullptr;
 
-	void SpawnWeapon();
+    UPROPERTY()
+    TArray<ADSBaseWeapon*> Weapons;
+
+    int32 CurrentWeaponIndex = 0;
+    void EquipWeapon(int32 WeaponIndex);
+    void SpawnWeapons();
+    void AttachWeaponToSocket(ADSBaseWeapon* Weapon, USceneComponent* SceneComponent, const FName& SocketName);
 };

@@ -12,22 +12,61 @@ UDSWeaponComponent::UDSWeaponComponent()
 void UDSWeaponComponent::BeginPlay()
 {
     Super::BeginPlay();
-    SpawnWeapon();
+    CurrentWeaponIndex = 0;
+    SpawnWeapons();
+    EquipWeapon(CurrentWeaponIndex);
 }
 
-void UDSWeaponComponent::SpawnWeapon()
+void UDSWeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-    if (!GetWorld()) return;
+    CurrentWeapon = nullptr;
+    for (auto Weapon : Weapons)
+    {
+        Weapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+        Weapon->Destroy();
+    }
+    Weapons.Empty();
 
-    ACharacter* Character = Cast<ACharacter>(GetOwner()); // указатель на персонажа
+    Super::EndPlay(EndPlayReason);
+}
+
+void UDSWeaponComponent::SpawnWeapons()
+{
+    ACharacter* Character = Cast<ACharacter>(GetOwner());  // указатель на персонажа
+    if (!GetWorld() || !Character) return;
+
+    for (auto WeaponClass : WeaponClasses)
+    {
+        auto Weapon = GetWorld()->SpawnActor<ADSBaseWeapon>(WeaponClass);  // Создаем оружие
+        if (!Weapon) continue;
+
+        Weapon->SetOwner(Character);
+        Weapons.Add(Weapon);
+
+        AttachWeaponToSocket(Weapon, Character->GetMesh(), WeaponArmorySocketName);
+    }
+}
+
+void UDSWeaponComponent::AttachWeaponToSocket(ADSBaseWeapon* Weapon, USceneComponent* SceneComponent, const FName& SocketName)
+{
+    if (!Weapon || !SceneComponent) return;
+    FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, false);  // привязываем оружие к мешу персонажа
+    Weapon->AttachToComponent(SceneComponent, AttachmentRules, SocketName);
+}
+
+void UDSWeaponComponent::EquipWeapon(int32 WeaponIndex)
+{
+    ACharacter* Character = Cast<ACharacter>(GetOwner());  // указатель на персонажа
     if (!Character) return;
 
-    CurrentWeapon = GetWorld()->SpawnActor<ADSBaseWeapon>(WeaponClass); // Создаем оружие
-    if (!CurrentWeapon) return;
-    
-    FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, false);  // привязываем оружие к мешу персонажа
-    CurrentWeapon->AttachToComponent(Character->GetMesh(), AttachmentRules, WeaponAttachPointName);
-    CurrentWeapon->SetOwner(Character);
+    if (CurrentWeapon)
+    {
+        CurrentWeapon->StopFire();
+        AttachWeaponToSocket(CurrentWeapon, Character->GetMesh(), WeaponArmorySocketName);
+    }
+
+    CurrentWeapon = Weapons[WeaponIndex];
+    AttachWeaponToSocket(CurrentWeapon, Character->GetMesh(), WeaponEquipSocketName);
 }
 
 void UDSWeaponComponent::StartFire()
@@ -40,4 +79,10 @@ void UDSWeaponComponent::StopFire()
 {
     if (!CurrentWeapon) return;
     CurrentWeapon->StopFire();
+}
+
+void UDSWeaponComponent::NextWeapon()
+{
+    CurrentWeaponIndex = (CurrentWeaponIndex + 1) % Weapons.Num();
+    EquipWeapon(CurrentWeaponIndex);
 }
