@@ -16,7 +16,8 @@ class DIPLOMASHOOTER_API ADSBaseWeapon : public AActor
 public:
     ADSBaseWeapon();
 
-    virtual void Fire();
+    virtual void StartFire();
+    virtual void StopFire();
 
 protected:
 
@@ -32,14 +33,20 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
     float DamageAmount = 10.0f;
 
+
+
     virtual void BeginPlay() override;
 
-    APlayerController* GetPlayerController() const;
 
-    void MakeShot();
+    virtual void MakeShot();
+    virtual bool GetTraceData(FVector& TraceStart, FVector& TraceEnd) const;
+    
+    APlayerController* GetPlayerController() const;
     bool GetPlayerViewPoint(FVector& ViewLocation, FRotator& ViewRotation) const;
     FVector GetMuzzleWorldLocation() const;
-    bool GetTraceData(FVector& TraceStart, FVector& TraceEnd) const;
+    
     void MakeHit(FHitResult& HitResult, const FVector& TraceStart, const FVector& TraceEnd);
     void MakeDamage(const FHitResult& HitResult);
+
+    
 };

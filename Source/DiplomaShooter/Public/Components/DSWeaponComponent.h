@@ -16,7 +16,8 @@ class DIPLOMASHOOTER_API UDSWeaponComponent : public UActorComponent
 public:	
 	UDSWeaponComponent();
 
-	void Fire();
+	void StartFire();
+	void StopFire();
 
 protected:
 	
