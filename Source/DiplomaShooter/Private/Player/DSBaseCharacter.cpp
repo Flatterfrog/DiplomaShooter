@@ -9,7 +9,7 @@
 #include "Components/DSHealthComponent.h"
 #include "Components/TextRenderComponent.h"
 #include "GameFramework/Controller.h"
-#include "Weapon/DSBaseWeapon.h"
+#include "Components/DSWeaponComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(BaseCharacterLog, All, All);
 
@@ -23,7 +23,7 @@ ADSBaseCharacter::ADSBaseCharacter(const FObjectInitializer& ObjInit)
     SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>("SpringArmComponent");
     SpringArmComponent->SetupAttachment(GetRootComponent());
     SpringArmComponent->bUsePawnControlRotation = true;
-    SpringArmComponent->SocketOffset = FVector(0.0f, 100.0f, 80.0f);
+    SpringArmComponent->SocketOffset = FVector(0.0f, 100.0f, 80.0f); // настройка расстояния от камеры до персонажа
 
     CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
     CameraComponent->SetupAttachment(SpringArmComponent);
@@ -33,6 +33,8 @@ ADSBaseCharacter::ADSBaseCharacter(const FObjectInitializer& ObjInit)
     HealthTextComponent = CreateDefaultSubobject<UTextRenderComponent>("HealthTextComponent");
     HealthTextComponent->SetupAttachment(GetRootComponent());
     HealthTextComponent->SetOwnerNoSee(true);
+
+    WeaponComponent = CreateDefaultSubobject<UDSWeaponComponent>("WeaponComponent");
 }
 
 // Called when the game starts or when spawned
@@ -50,7 +52,6 @@ void ADSBaseCharacter::BeginPlay()
 
     LandedDelegate.AddDynamic(this, &ADSBaseCharacter::OnGroundLanded);
 
-    SpawnWeapon();
 }
 
 void ADSBaseCharacter::OnHealthChanged(float Health) 
@@ -59,18 +60,19 @@ void ADSBaseCharacter::OnHealthChanged(float Health)
 
 }
 
-// Called every frame
 void ADSBaseCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 }
 
 
-// Called to bind functionality to input
+// Обработка нажатий на клавиши
 void ADSBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
     Super::SetupPlayerInputComponent(PlayerInputComponent);
     check(PlayerInputComponent);
+    check(WeaponComponent);
+
     PlayerInputComponent->BindAxis("MoveForward", this, &ADSBaseCharacter::MoveForward);
     PlayerInputComponent->BindAxis("MoveRight", this, &ADSBaseCharacter::MoveRight);
     PlayerInputComponent->BindAxis("LookUp", this, &ADSBaseCharacter::AddControllerPitchInput);
@@ -78,6 +80,7 @@ void ADSBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
     PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ADSBaseCharacter::Jump);
     PlayerInputComponent->BindAction("Run", IE_Pressed, this, &ADSBaseCharacter::OnStartRunning);
     PlayerInputComponent->BindAction("Run", IE_Released, this, &ADSBaseCharacter::OnStopRunning);
+    PlayerInputComponent->BindAction("Fire", IE_Pressed, WeaponComponent, &UDSWeaponComponent::Fire);
 }
 
 bool ADSBaseCharacter::IsRunning() const
@@ -139,15 +142,4 @@ void ADSBaseCharacter::OnGroundLanded(const FHitResult& Hit)
     if (FallVelocityZ < LandedDamageVelocity.X) return;
     const auto FinalDamage = FMath::GetMappedRangeValueClamped(LandedDamageVelocity, LandedDamage, FallVelocityZ);
     TakeDamage(FinalDamage, FDamageEvent{}, nullptr, nullptr);
-}
-
-void ADSBaseCharacter::SpawnWeapon()
-{
-    if (!GetWorld()) return;
-    const auto Weapon = GetWorld()->SpawnActor<ADSBaseWeapon>(WeaponClass);
-    if (Weapon)
-    {
-        FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, false); // привязываем оружие к мешу персонажа
-        Weapon->AttachToComponent(GetMesh(), AttachmentRules, "WeaponPoint");
-    }
 }
