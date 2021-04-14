@@ -9,6 +9,7 @@
 #include "Components/DSHealthComponent.h"
 #include "Components/TextRenderComponent.h"
 #include "GameFramework/Controller.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/DSWeaponComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(BaseCharacterLog, All, All);
@@ -134,6 +135,7 @@ void ADSBaseCharacter::OnDeath()
     {
         Controller->ChangeState(NAME_Spectating);
     }
+    GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 }
 
 void ADSBaseCharacter::OnGroundLanded(const FHitResult& Hit)
