@@ -7,9 +7,9 @@
 
 void ADSRifleWeapon::StartFire()
 {
-
-    MakeShot();
     GetWorldTimerManager().SetTimer(ShotTimerHandle, this, &ADSRifleWeapon::MakeShot, TimeBetweenShots, true);
+    MakeShot();
+    
 }
 void ADSRifleWeapon::StopFire()
 {

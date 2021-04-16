@@ -4,9 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "DSCoreTypes.h"
 #include "DSWeaponComponent.generated.h"
 
 class ADSBaseWeapon;
+
+
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class DIPLOMASHOOTER_API UDSWeaponComponent : public UActorComponent
@@ -19,18 +22,19 @@ public:
     void StartFire();
     void StopFire();
     void NextWeapon();
+    void Reload();
 
 protected:
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+    TArray<FWeaponData> WeaponData;
+
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     FName WeaponEquipSocketName = "WeaponSocket";
 
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     FName WeaponArmorySocketName = "ArmorySocket";
 
-    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-    TArray<TSubclassOf<ADSBaseWeapon>> WeaponClasses;
-
-    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+    UPROPERTY(EditDefaultsOnly, Category = "Animation")
     UAnimMontage* EquipAnimMontage;
 
     virtual void BeginPlay() override;
@@ -43,8 +47,12 @@ private:
     UPROPERTY()
     TArray<ADSBaseWeapon*> Weapons;
 
+    UPROPERTY()
+    UAnimMontage* CurrentReloadAnimMontage = nullptr;
+
     int32 CurrentWeaponIndex = 0;
     bool EquipAnimInProgress = false;
+    bool ReloadAnimInProgress = false;
 
     void EquipWeapon(int32 WeaponIndex);
     void SpawnWeapons();
@@ -53,8 +61,12 @@ private:
 
     void InitAnimations();
     void OnEquipFinished(USkeletalMeshComponent* MeshComponent);
-    
+    void OnReloadFinished(USkeletalMeshComponent* MeshComponent);
+
     bool CanFire() const;
     bool CanEquip() const;
+    bool CanReload() const;
 
+    void OnEmptyClip();
+    void ChangeClip();
 };

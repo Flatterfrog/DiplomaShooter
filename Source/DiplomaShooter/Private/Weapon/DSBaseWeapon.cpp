@@ -20,23 +20,15 @@ void ADSBaseWeapon::BeginPlay()
     Super::BeginPlay();
 
     check(WeaponMesh);
-
+    checkf(DefaultAmmo.Bullets > 0, TEXT("Bullets count couldn't be less or equal zero"));
+    checkf(DefaultAmmo.Clips > 0, TEXT("Clips count couldn't be less or equal zero"));
     CurrentAmmo = DefaultAmmo;
 }
 
-void ADSBaseWeapon::StartFire()
-{
-    
-}
-void ADSBaseWeapon::StopFire()
-{
+void ADSBaseWeapon::StartFire() {}
+void ADSBaseWeapon::StopFire() {}
 
-}
-
-void ADSBaseWeapon::MakeShot()
-{
-
-}
+void ADSBaseWeapon::MakeShot() {}
 
 APlayerController* ADSBaseWeapon::GetPlayerController() const
 {
@@ -81,36 +73,54 @@ void ADSBaseWeapon::MakeHit(FHitResult& HitResult, const FVector& TraceStart, co
     GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, CollisionParams);
 }
 
-
-void ADSBaseWeapon::DecreaseAmmo() 
+void ADSBaseWeapon::DecreaseAmmo()
 {
+
+    if (CurrentAmmo.Bullets == 0)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Clip is empty"));
+        return;
+    }
+
     CurrentAmmo.Bullets--;
     LogAmmo();
     if (IsClipEmpty() && !IsAmmoEmpty())
     {
-        ChangeClip();
+        StopFire();
+        OnClipEmpty.Broadcast();
     }
 }
-bool ADSBaseWeapon::IsAmmoEmpty() const 
+bool ADSBaseWeapon::IsAmmoEmpty() const
 {
     return !CurrentAmmo.Infinite && CurrentAmmo.Clips == 0 && IsClipEmpty();
 }
-bool ADSBaseWeapon::IsClipEmpty() const 
+bool ADSBaseWeapon::IsClipEmpty() const
 {
     return CurrentAmmo.Bullets == 0;
 }
 
-void ADSBaseWeapon::ChangeClip() 
+void ADSBaseWeapon::ChangeClip()
 {
-    CurrentAmmo.Bullets = DefaultAmmo.Bullets;
+
     if (!CurrentAmmo.Infinite)
     {
+        if (CurrentAmmo.Clips == 0)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("No more clips"));
+            return;
+        }
         CurrentAmmo.Clips--;
     }
+    CurrentAmmo.Bullets = DefaultAmmo.Bullets;
     UE_LOG(LogTemp, Display, TEXT("----change clip -----"));
-    }
+}
 
-void ADSBaseWeapon::LogAmmo() 
+bool ADSBaseWeapon::CanReload() const
+{
+    return CurrentAmmo.Bullets < DefaultAmmo.Bullets && CurrentAmmo.Clips > 0;
+}
+
+void ADSBaseWeapon::LogAmmo()
 {
     FString AmmoInfo = "Ammo: " + FString::FromInt(CurrentAmmo.Bullets) + " / ";
     AmmoInfo += CurrentAmmo.Infinite ? "Infinite" : FString::FromInt(CurrentAmmo.Clips);

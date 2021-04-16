@@ -4,6 +4,10 @@
 #include "Weapon/DSBaseWeapon.h"
 #include "GameFramework/Character.h"
 #include "Animations/DSEquipFinishedAnimNotify.h"
+#include "Animations/DSReloadFinishedAnimNotify.h"
+#include "Animations/AnimUtils.h"
+
+constexpr static int32 WeaponNum = 2;
 
 UDSWeaponComponent::UDSWeaponComponent()
 {
@@ -13,8 +17,9 @@ UDSWeaponComponent::UDSWeaponComponent()
 void UDSWeaponComponent::BeginPlay()
 {
     Super::BeginPlay();
+    checkf(WeaponData.Num() == WeaponNum, TEXT("Our character can hold only %i weapon items"), WeaponNum);
     CurrentWeaponIndex = 0;
-    InitAnimations(); 
+    InitAnimations();
     SpawnWeapons();
     EquipWeapon(CurrentWeaponIndex);
 }
@@ -37,11 +42,12 @@ void UDSWeaponComponent::SpawnWeapons()
     ACharacter* Character = Cast<ACharacter>(GetOwner());  // указатель на персонажа
     if (!GetWorld() || !Character) return;
 
-    for (auto WeaponClass : WeaponClasses)
+    for (auto OneWeaponData : WeaponData)
     {
-        auto Weapon = GetWorld()->SpawnActor<ADSBaseWeapon>(WeaponClass);  // Создаем оружие
+        auto Weapon = GetWorld()->SpawnActor<ADSBaseWeapon>(OneWeaponData.WeaponClass);  // Создаем оружие
         if (!Weapon) continue;
 
+        Weapon->OnClipEmpty.AddUObject(this, &UDSWeaponComponent::OnEmptyClip);
         Weapon->SetOwner(Character);
         Weapons.Add(Weapon);
 
@@ -58,6 +64,11 @@ void UDSWeaponComponent::AttachWeaponToSocket(ADSBaseWeapon* Weapon, USceneCompo
 
 void UDSWeaponComponent::EquipWeapon(int32 WeaponIndex)
 {
+    if (WeaponIndex < 0 || WeaponIndex >= Weapons.Num())
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Invalid weapon index"));
+        return;
+    }
     ACharacter* Character = Cast<ACharacter>(GetOwner());  // указатель на персонажа
     if (!Character) return;
 
@@ -68,6 +79,12 @@ void UDSWeaponComponent::EquipWeapon(int32 WeaponIndex)
     }
 
     CurrentWeapon = Weapons[WeaponIndex];
+
+    const auto CurrentWeaponData = WeaponData.FindByPredicate([&](const FWeaponData& Data) {  //
+        return Data.WeaponClass == CurrentWeapon->GetClass();                                 //
+    });
+    CurrentReloadAnimMontage = CurrentWeaponData ? CurrentWeaponData->ReloadAnimMontage : nullptr;
+
     AttachWeaponToSocket(CurrentWeapon, Character->GetMesh(), WeaponEquipSocketName);
     EquipAnimInProgress = true;
     PlayAnimMontage(EquipAnimMontage);
@@ -92,7 +109,7 @@ void UDSWeaponComponent::NextWeapon()
     EquipWeapon(CurrentWeaponIndex);
 }
 
-void UDSWeaponComponent::PlayAnimMontage(UAnimMontage* Animation) 
+void UDSWeaponComponent::PlayAnimMontage(UAnimMontage* Animation)
 {
     ACharacter* Character = Cast<ACharacter>(GetOwner());  // указатель на персонажа
     if (!Character) return;
@@ -100,36 +117,73 @@ void UDSWeaponComponent::PlayAnimMontage(UAnimMontage* Animation)
     Character->PlayAnimMontage(Animation);
 }
 
-
-
-void UDSWeaponComponent::InitAnimations() 
+void UDSWeaponComponent::InitAnimations()
 {
-    if (!EquipAnimMontage) return;
-    const auto NotifyEvents = EquipAnimMontage->Notifies;
-    for (auto NotifyEvent : NotifyEvents)
+    auto EquipFinishedNotify = AnimUtils::FindNotifyByClass<UDSEquipFinishedAnimNotify>(EquipAnimMontage);
+    if (EquipFinishedNotify)
     {
-        auto EquipFinishedNotify = Cast<UDSEquipFinishedAnimNotify>(NotifyEvent.Notify);
-        if (EquipFinishedNotify)
-        {
-            EquipFinishedNotify->OnNotified.AddUObject(this, &UDSWeaponComponent::OnEquipFinished);
-            break;
+        EquipFinishedNotify->OnNotified.AddUObject(this, &UDSWeaponComponent::OnEquipFinished);
+    }else
+    {
+        UE_LOG(LogTemp, Error, TEXT("Equip anim notify is forgotten to set"));
+        checkNoEntry();
+    }
 
+    for (auto OneWeaponData : WeaponData)
+    {
+        auto ReloadFinishedNotify = AnimUtils::FindNotifyByClass<UDSReloadFinishedAnimNotify>(OneWeaponData.ReloadAnimMontage);
+
+        if (!ReloadFinishedNotify)
+        {
+            UE_LOG(LogTemp, Error, TEXT("Reload anim notify is forgotten to set"));
+            checkNoEntry();
         }
+
+        ReloadFinishedNotify->OnNotified.AddUObject(this, &UDSWeaponComponent::OnReloadFinished);
     }
 }
-void UDSWeaponComponent::OnEquipFinished(USkeletalMeshComponent* MeshComponent) 
+void UDSWeaponComponent::OnEquipFinished(USkeletalMeshComponent* MeshComponent)
 {
     ACharacter* Character = Cast<ACharacter>(GetOwner());  // указатель на персонажа
     if (!Character || Character->GetMesh() != MeshComponent) return;
     EquipAnimInProgress = false;
-
 }
 
-bool UDSWeaponComponent::CanFire() const 
+void UDSWeaponComponent::OnReloadFinished(USkeletalMeshComponent* MeshComponent)
 {
-    return CurrentWeapon && !EquipAnimInProgress;
+    ACharacter* Character = Cast<ACharacter>(GetOwner());  // указатель на персонажа
+    if (!Character || Character->GetMesh() != MeshComponent) return;
+    ReloadAnimInProgress = false;
 }
-bool UDSWeaponComponent::CanEquip() const 
+
+bool UDSWeaponComponent::CanFire() const
 {
-    return !EquipAnimInProgress;
+    return CurrentWeapon && !EquipAnimInProgress && !ReloadAnimInProgress;
+}
+bool UDSWeaponComponent::CanEquip() const
+{
+    return !EquipAnimInProgress && !ReloadAnimInProgress;
+}
+bool UDSWeaponComponent::CanReload() const
+{
+    return CurrentWeapon && !EquipAnimInProgress && !ReloadAnimInProgress && CurrentWeapon->CanReload();
+}
+
+void UDSWeaponComponent::Reload()
+{
+    ChangeClip();
+}
+
+void UDSWeaponComponent::OnEmptyClip()
+{
+    ChangeClip();
+}
+void UDSWeaponComponent::ChangeClip()
+{
+    if (!CanReload()) return;
+    CurrentWeapon->StopFire();
+    CurrentWeapon->ChangeClip();
+
+    ReloadAnimInProgress = true;
+    PlayAnimMontage(CurrentReloadAnimMontage);
 }
