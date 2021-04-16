@@ -3,7 +3,6 @@
 #include "Weapon/DSBaseWeapon.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/World.h"
-#include "DrawDebugHelpers.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/Character.h"
 
@@ -21,6 +20,8 @@ void ADSBaseWeapon::BeginPlay()
     Super::BeginPlay();
 
     check(WeaponMesh);
+
+    CurrentAmmo = DefaultAmmo;
 }
 
 void ADSBaseWeapon::StartFire()
@@ -78,4 +79,40 @@ void ADSBaseWeapon::MakeHit(FHitResult& HitResult, const FVector& TraceStart, co
     FCollisionQueryParams CollisionParams;
     CollisionParams.AddIgnoredActor(GetOwner());  // исключаем возможность выстрела в самого себ€
     GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, CollisionParams);
+}
+
+
+void ADSBaseWeapon::DecreaseAmmo() 
+{
+    CurrentAmmo.Bullets--;
+    LogAmmo();
+    if (IsClipEmpty() && !IsAmmoEmpty())
+    {
+        ChangeClip();
+    }
+}
+bool ADSBaseWeapon::IsAmmoEmpty() const 
+{
+    return !CurrentAmmo.Infinite && CurrentAmmo.Clips == 0 && IsClipEmpty();
+}
+bool ADSBaseWeapon::IsClipEmpty() const 
+{
+    return CurrentAmmo.Bullets == 0;
+}
+
+void ADSBaseWeapon::ChangeClip() 
+{
+    CurrentAmmo.Bullets = DefaultAmmo.Bullets;
+    if (!CurrentAmmo.Infinite)
+    {
+        CurrentAmmo.Clips--;
+    }
+    UE_LOG(LogTemp, Display, TEXT("----change clip -----"));
+    }
+
+void ADSBaseWeapon::LogAmmo() 
+{
+    FString AmmoInfo = "Ammo: " + FString::FromInt(CurrentAmmo.Bullets) + " / ";
+    AmmoInfo += CurrentAmmo.Infinite ? "Infinite" : FString::FromInt(CurrentAmmo.Clips);
+    UE_LOG(LogTemp, Display, TEXT("%s"), *AmmoInfo);
 }
