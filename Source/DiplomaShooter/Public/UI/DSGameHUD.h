@@ -6,9 +6,6 @@
 #include "GameFramework/HUD.h"
 #include "DSGameHUD.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class DIPLOMASHOOTER_API ADSGameHUD : public AHUD
 {
@@ -17,6 +14,12 @@ class DIPLOMASHOOTER_API ADSGameHUD : public AHUD
 		public:
 
     virtual void DrawHUD() override;
+
+	protected:
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    TSubclassOf<UUserWidget> PlayerHUDWidgetClass;
+
+	virtual void BeginPlay() override;
 
 	private:
     void DrawCrossHair();

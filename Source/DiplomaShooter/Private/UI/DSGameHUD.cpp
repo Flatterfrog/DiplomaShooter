@@ -3,12 +3,26 @@
 
 #include "UI/DSGameHUD.h"
 #include "Engine/Canvas.h"
+#include "Blueprint/UserWidget.h"
 
 void ADSGameHUD::DrawHUD() 
 {
     Super::DrawHUD();
 
-    DrawCrossHair();
+ //   DrawCrossHair();
+
+}
+
+void ADSGameHUD::BeginPlay() 
+{
+    Super::BeginPlay();
+
+    auto PlayerHUDWidget = CreateWidget<UUserWidget>(GetWorld(), PlayerHUDWidgetClass);
+
+    if (PlayerHUDWidget)
+    {
+        PlayerHUDWidget->AddToViewport();
+    }
 
 }
 
