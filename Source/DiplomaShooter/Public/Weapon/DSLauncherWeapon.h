@@ -20,5 +20,7 @@ class DIPLOMASHOOTER_API ADSLauncherWeapon : public ADSBaseWeapon
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
     TSubclassOf<ADSProjectile> ProjectileClass;
 
+
+
     virtual void MakeShot() override;
 };

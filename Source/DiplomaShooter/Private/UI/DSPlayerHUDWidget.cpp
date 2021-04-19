@@ -5,6 +5,28 @@
 #include "Components/DSWeaponComponent.h"
 #include "DSUtils.h"
 
+bool UDSPlayerHUDWidget::Initialize() 
+{
+
+      const auto HealthComponent = DSUtils::GetDSPlayerComponent<UDSHealthComponent>(GetOwningPlayerPawn());
+    if (HealthComponent)
+    {
+        HealthComponent->OnHealthChanged.AddUObject(this, &UDSPlayerHUDWidget::OnHealthChanged);
+    }
+    return Super::Initialize();
+}
+
+
+void UDSPlayerHUDWidget::OnHealthChanged(float Health, float HealthDelta)
+{
+
+    if (HealthDelta < 0.0f)
+    {
+
+        OnTakeDamage();
+    }
+}
+
 float UDSPlayerHUDWidget::GetHealthPercent() const
 {
     const auto HealthComponent = DSUtils::GetDSPlayerComponent<UDSHealthComponent>(GetOwningPlayerPawn());

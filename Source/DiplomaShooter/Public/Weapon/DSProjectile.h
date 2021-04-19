@@ -8,6 +8,7 @@
 
 class USphereComponent;
 class UProjectileMovementComponent;
+class UDSWeaponFXComponent;
 
 UCLASS()
 class DIPLOMASHOOTER_API ADSProjectile : public AActor
@@ -25,6 +26,9 @@ protected:
 
     UPROPERTY(VisibleAnywhere, Category = "Weapon")
     UProjectileMovementComponent* MovementComponent;
+
+        UPROPERTY(VisibleAnywhere, Category = "VFX")
+    UDSWeaponFXComponent* WeaponFXComponent;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
     float DamageRadius = 200.0f;

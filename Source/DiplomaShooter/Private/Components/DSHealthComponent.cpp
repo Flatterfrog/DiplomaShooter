@@ -2,8 +2,12 @@
 
 #include "Components/DSHealthComponent.h"
 #include "GameFramework/Actor.h"
+#include "GameFramework/Pawn.h"
+#include "GameFramework/Controller.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
+#include "Camera/CameraShake.h"
+
 UDSHealthComponent::UDSHealthComponent()
 {
 
@@ -42,9 +46,11 @@ void UDSHealthComponent::OnTakeAnyDamage(
     {
         GetWorld()->GetTimerManager().SetTimer(HealTimerHandle, this, &UDSHealthComponent::HealUpdate, HealUpdateTime, true, HealDelay);
     }
+
+    PlayCameraShake();
 }
 
-void UDSHealthComponent::HealUpdate() 
+void UDSHealthComponent::HealUpdate()
 {
     SetHealth(Health + HealModifier);
 
@@ -54,9 +60,25 @@ void UDSHealthComponent::HealUpdate()
     }
 }
 
-void UDSHealthComponent::SetHealth(float NewHealth) 
+void UDSHealthComponent::SetHealth(float NewHealth)
 {
-    Health = FMath::Clamp(NewHealth, 0.0f, MaxHealth);
-    OnHealthChanged.Broadcast(Health);
+
+    const auto NextHealth = FMath::Clamp(NewHealth, 0.0f, MaxHealth);
+    const auto HealthDelta = NextHealth - Health;
+
+    Health = NextHealth;
+    OnHealthChanged.Broadcast(Health, HealthDelta);
 }
 
+void UDSHealthComponent::PlayCameraShake()
+{
+    if (IsDead()) return;
+    const auto Player = Cast<APawn>(GetOwner());
+    if (!Player) return;
+    
+    const auto Controller = Player->GetController<APlayerController>();
+    if (!Controller || !Controller->PlayerCameraManager) return;
+
+    Controller->PlayerCameraManager->StartCameraShake(CameraShake);
+
+}

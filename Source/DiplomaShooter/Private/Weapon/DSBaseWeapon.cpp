@@ -70,6 +70,7 @@ void ADSBaseWeapon::MakeHit(FHitResult& HitResult, const FVector& TraceStart, co
 
     FCollisionQueryParams CollisionParams;
     CollisionParams.AddIgnoredActor(GetOwner());  // исключаем возможность выстрела в самого себ€
+    CollisionParams.bReturnPhysicalMaterial = true;
     GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, CollisionParams);
 }
 
