@@ -18,7 +18,7 @@ class DIPLOMASHOOTER_API ADSBaseCharacter : public ACharacter
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
+	
 	ADSBaseCharacter(const FObjectInitializer& ObjInit);
 
 protected:
@@ -49,8 +49,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
     FVector2D LandedDamage = FVector2D(10.0f, 100.0f);
-
-	
 
 	virtual void BeginPlay() override;
 

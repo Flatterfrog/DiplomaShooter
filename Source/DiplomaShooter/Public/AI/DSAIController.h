@@ -6,12 +6,12 @@
 #include "AIController.h"
 #include "DSAIController.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class DIPLOMASHOOTER_API ADSAIController : public AAIController
 {
 	GENERATED_BODY()
+
+	protected:
+    virtual void OnPossess(APawn* InPawn) override;
 	
 };

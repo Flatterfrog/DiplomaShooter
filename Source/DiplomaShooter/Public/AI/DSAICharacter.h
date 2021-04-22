@@ -6,6 +6,7 @@
 #include "Player/DSBaseCharacter.h"
 #include "DSAICharacter.generated.h"
 
+class UBehaviorTree;
 
 UCLASS()
 class DIPLOMASHOOTER_API ADSAICharacter : public ADSBaseCharacter
@@ -14,5 +15,8 @@ class DIPLOMASHOOTER_API ADSAICharacter : public ADSBaseCharacter
 
 		public:
     ADSAICharacter(const FObjectInitializer& ObjInit);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AI")
+    UBehaviorTree* BehaviorTreeAsset;
 	
 };

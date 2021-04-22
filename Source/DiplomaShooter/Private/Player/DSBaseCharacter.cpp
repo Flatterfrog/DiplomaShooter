@@ -14,11 +14,9 @@
 
 DEFINE_LOG_CATEGORY_STATIC(BaseCharacterLog, All, All);
 
-// Sets default values
 ADSBaseCharacter::ADSBaseCharacter(const FObjectInitializer& ObjInit)
     : Super(ObjInit.SetDefaultSubobjectClass<UDSCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
-    // Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
     PrimaryActorTick.bCanEverTick = true;
 
     SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>("SpringArmComponent");
@@ -38,7 +36,6 @@ ADSBaseCharacter::ADSBaseCharacter(const FObjectInitializer& ObjInit)
     WeaponComponent = CreateDefaultSubobject<UDSWeaponComponent>("WeaponComponent");
 }
 
-// Called when the game starts or when spawned
 void ADSBaseCharacter::BeginPlay()
 {
     Super::BeginPlay();
@@ -53,13 +50,11 @@ void ADSBaseCharacter::BeginPlay()
     HealthComponent->OnHealthChanged.AddUObject(this, &ADSBaseCharacter::OnHealthChanged);
 
     LandedDelegate.AddDynamic(this, &ADSBaseCharacter::OnGroundLanded);
-
 }
 
 void ADSBaseCharacter::OnHealthChanged(float Health, float HealthDelta)
 {
     HealthTextComponent->SetText(FText::FromString(FString::Printf(TEXT("%.0f"), Health)));
-
 }
 
 void ADSBaseCharacter::Tick(float DeltaTime)
@@ -67,8 +62,6 @@ void ADSBaseCharacter::Tick(float DeltaTime)
     Super::Tick(DeltaTime);
 }
 
-
-// Обработка нажатий на клавиши
 void ADSBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
     Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -129,8 +122,6 @@ void ADSBaseCharacter::OnStopRunning()
 void ADSBaseCharacter::OnDeath() 
 {
     UE_LOG(BaseCharacterLog, Display, TEXT("Player %s is dead"), *GetName());
-
-  //  PlayAnimMontage(DeathAnimMontage);
 
     GetCharacterMovement()->DisableMovement();
 
