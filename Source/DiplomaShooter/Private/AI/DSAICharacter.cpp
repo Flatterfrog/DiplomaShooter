@@ -4,8 +4,10 @@
 #include "AI/DSAICharacter.h"
 #include "AI/DSAIController.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Components/DSAIWeaponComponent.h"
 
-ADSAICharacter::ADSAICharacter(const FObjectInitializer& ObjInit) : Super(ObjInit) 
+ADSAICharacter::ADSAICharacter(const FObjectInitializer& ObjInit) 
+: Super(ObjInit.SetDefaultSubobjectClass<UDSAIWeaponComponent>("WeaponComponent"))
 {
     AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
     AIControllerClass = ADSAIController::StaticClass();

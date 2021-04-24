@@ -4,7 +4,7 @@ class DSUtils
 {
 public:
 	template<typename T>
-    static T* GetDSPlayerComponent(APawn* PlayerPawn)
+    static T* GetDSPlayerComponent(AActor* PlayerPawn)
     {
         if (!PlayerPawn) return nullptr;
 

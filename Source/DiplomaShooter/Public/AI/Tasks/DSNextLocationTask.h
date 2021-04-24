@@ -23,4 +23,10 @@ class DIPLOMASHOOTER_API UDSNextLocationTask : public UBTTaskNode
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
     FBlackboardKeySelector AimLocationKey;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
+    bool SelfCenter = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI", meta = (EditCondition = "!SelfCenter"))
+    FBlackboardKeySelector CenterActorKey;
 };
