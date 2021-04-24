@@ -18,5 +18,9 @@ class DIPLOMASHOOTER_API ADSAICharacter : public ADSBaseCharacter
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AI")
     UBehaviorTree* BehaviorTreeAsset;
+
+
+	protected:
+	virtual void OnDeath() override;
 	
 };

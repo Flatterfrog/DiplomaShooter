@@ -5,6 +5,7 @@
 #include "AI/DSAIController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/DSAIWeaponComponent.h"
+#include "BrainComponent.h"
 
 ADSAICharacter::ADSAICharacter(const FObjectInitializer& ObjInit) 
 : Super(ObjInit.SetDefaultSubobjectClass<UDSAIWeaponComponent>("WeaponComponent"))
@@ -17,5 +18,16 @@ ADSAICharacter::ADSAICharacter(const FObjectInitializer& ObjInit)
     {
         GetCharacterMovement()->bUseControllerDesiredRotation = true;
         GetCharacterMovement()->RotationRate = FRotator(0.0f, 200.0f, 0.0f);
+    }
+}
+
+void ADSAICharacter::OnDeath() 
+{
+    Super::OnDeath();
+
+    const auto DSController = Cast<AAIController>(Controller);
+    if (DSController && DSController->BrainComponent)
+    {
+        DSController->BrainComponent->Cleanup();
     }
 }

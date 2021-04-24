@@ -51,6 +51,7 @@ protected:
     FVector2D LandedDamage = FVector2D(10.0f, 100.0f);
 
 	virtual void BeginPlay() override;
+    virtual void OnDeath();
 
 public:	
 
@@ -73,7 +74,7 @@ public:
 	void OnStartRunning();
     void OnStopRunning();
 
-	void OnDeath();
+	
     void OnHealthChanged(float Health, float HealthDelta);
 
     UFUNCTION()
