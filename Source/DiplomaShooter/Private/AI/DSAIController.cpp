@@ -10,6 +10,8 @@ ADSAIController::ADSAIController()
 {
     DSAIPerceptionComponent = CreateDefaultSubobject<UDSAIPerceptionComponent>("DSPerceptionComponent");
     SetPerceptionComponent(*DSAIPerceptionComponent);
+
+    bWantsPlayerState = true;
 }
 
 void ADSAIController::OnPossess(APawn* InPawn) 
