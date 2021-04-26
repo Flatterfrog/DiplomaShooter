@@ -4,12 +4,15 @@
 #include "AI/DSAIController.h"
 #include "AI/DSAICharacter.h"
 #include "Components/DSAIPerceptionComponent.h"
+#include "Components/DSRespawnComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
 ADSAIController::ADSAIController() 
 {
     DSAIPerceptionComponent = CreateDefaultSubobject<UDSAIPerceptionComponent>("DSPerceptionComponent");
     SetPerceptionComponent(*DSAIPerceptionComponent);
+
+    RespawnComponent = CreateDefaultSubobject<UDSRespawnComponent>("RespawnComponent");
 
     bWantsPlayerState = true;
 }

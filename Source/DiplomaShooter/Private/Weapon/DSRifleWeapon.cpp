@@ -81,7 +81,7 @@ void ADSRifleWeapon::MakeDamage(const FHitResult& HitResult)
     const auto DamagedActor = HitResult.GetActor();
     if (!DamagedActor) return;
 
-    DamagedActor->TakeDamage(DamageAmount, FDamageEvent(), GetPlayerController(), this);
+    DamagedActor->TakeDamage(DamageAmount, FDamageEvent(), GetController(), this);
 }
 
 void ADSRifleWeapon::SpawnTraceFX(const FVector& TraceStart, const FVector& TraceEnd) 
@@ -93,3 +93,9 @@ void ADSRifleWeapon::SpawnTraceFX(const FVector& TraceStart, const FVector& Trac
         TraceFXComponent->SetNiagaraVariableVec3(TraceTargetName, TraceEnd);
     }
 }
+
+    AController* ADSRifleWeapon::GetController() const 
+    {
+        const auto Pawn = Cast<APawn>(GetOwner());
+        return Pawn ? Pawn->GetController() : nullptr;
+    }

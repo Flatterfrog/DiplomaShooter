@@ -30,14 +30,6 @@ void ADSBaseWeapon::StopFire() {}
 
 void ADSBaseWeapon::MakeShot() {}
 
-APlayerController* ADSBaseWeapon::GetPlayerController() const
-{
-    const auto Player = Cast<ACharacter>(GetOwner());
-    if (!Player) return nullptr;
-
-    return Player->GetController<APlayerController>();
-}
-
 bool ADSBaseWeapon::GetPlayerViewPoint(FVector& ViewLocation, FRotator& ViewRotation) const
 {
     const auto DSCharacter = Cast<ACharacter>(GetOwner());
@@ -45,7 +37,7 @@ bool ADSBaseWeapon::GetPlayerViewPoint(FVector& ViewLocation, FRotator& ViewRota
 
     if (DSCharacter->IsPlayerControlled())
     {
-        const auto Controller = GetPlayerController();
+        const auto Controller = DSCharacter->GetController<APlayerController>();
         if (!Controller) return false;
 
         Controller->GetPlayerViewPoint(ViewLocation, ViewRotation);

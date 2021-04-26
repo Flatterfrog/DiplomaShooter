@@ -7,6 +7,8 @@
 #include "Engine/World.h"
 #include "TimerManager.h"
 #include "Camera/CameraShake.h"
+#include "DSGameModeBase.h"
+
 
 UDSHealthComponent::UDSHealthComponent()
 {
@@ -40,6 +42,7 @@ void UDSHealthComponent::OnTakeAnyDamage(
 
     if (IsDead())
     {
+        Killed(InstigatedBy);
         OnDeath.Broadcast();
     }
     else if (AutoHeal && GetWorld())
@@ -80,5 +83,18 @@ void UDSHealthComponent::PlayCameraShake()
     if (!Controller || !Controller->PlayerCameraManager) return;
 
     Controller->PlayerCameraManager->StartCameraShake(CameraShake);
+
+}
+
+void UDSHealthComponent::Killed(AController* KillerController)
+{
+    if(!GetWorld()) return;
+    const auto GameMode = Cast<ADSGameModeBase>(GetWorld()->GetAuthGameMode());
+    if(!GameMode) return;
+
+    const auto Player = Cast<APawn>(GetOwner());
+    const auto VictimController = Player ? Player->Controller : nullptr;
+
+    GameMode->Killed(KillerController,VictimController);
 
 }

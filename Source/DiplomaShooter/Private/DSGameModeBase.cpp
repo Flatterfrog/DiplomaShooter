@@ -6,7 +6,11 @@
 #include "UI/DSGameHUD.h"
 #include "AIController.h"
 #include "Player/DSPlayerState.h"
+#include "DSUtils.h"
+#include "Components/DSRespawnComponent.h"
+#include "EngineUtils.h"
 
+constexpr static int32 MinRoundTimeForRespawn = 10;
 
 ADSGameModeBase::ADSGameModeBase()
 {
@@ -70,6 +74,8 @@ void ADSGameModeBase::GameTimerUpdate()
         }
         else
         {
+
+            GameOver();
             UE_LOG(LogTemp, Display, TEXT("GAME OVER"));
         }
     }
@@ -133,4 +139,48 @@ void ADSGameModeBase::SetPlayerColor(AController* Controller)
     if (!PlayerState) return;
 
     Character->SetPlayerColor(PlayerState->GetTeamColor());
+}
+
+void ADSGameModeBase::Killed(AController* KillerController, AController* VictimController)
+{
+    const auto KillerPlayerState = KillerController ? Cast<ADSPlayerState>(KillerController->PlayerState) : nullptr;
+    const auto VictimPlayerState = VictimController ? Cast<ADSPlayerState>(VictimController->PlayerState) : nullptr;
+
+    if (KillerPlayerState) {
+        KillerPlayerState->AddKill();
+    }
+    if(VictimPlayerState)
+    {
+        VictimPlayerState->AddDeath();
+    }
+
+    StartRespawn(VictimController);
+}
+
+void ADSGameModeBase::StartRespawn(AController* Controller)
+{
+    const auto RespawnAvailable = RoundCountDown > MinRoundTimeForRespawn + GameData.RespawnTime;
+    if (!RespawnAvailable) return;
+
+    const auto RespawnComponent = DSUtils::GetDSPlayerComponent<UDSRespawnComponent>(Controller);
+    if (!RespawnComponent) return;
+
+    RespawnComponent->Respawn(GameData.RespawnTime);
+}
+
+void ADSGameModeBase::RespawnRequest(AController* Controller) 
+{
+    ResetOnePlayer(Controller);
+}
+
+void ADSGameModeBase::GameOver() 
+{
+    for (auto Pawn : TActorRange<APawn>(GetWorld()))
+    {
+        if(Pawn)
+        {
+            Pawn->TurnOff();
+            Pawn->DisableInput(nullptr);
+        }
+    }
 }

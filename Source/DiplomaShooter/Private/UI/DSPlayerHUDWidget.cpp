@@ -7,13 +7,22 @@
 
 bool UDSPlayerHUDWidget::Initialize() 
 {
+    if(GetOwningPlayer())
+    {
+        GetOwningPlayer()->GetOnNewPawnNotifier().AddUObject(this, &UDSPlayerHUDWidget::OnNewPawn);
+        OnNewPawn(GetOwningPlayerPawn());
+    }
+    return Super::Initialize();
+}
 
-      const auto HealthComponent = DSUtils::GetDSPlayerComponent<UDSHealthComponent>(GetOwningPlayerPawn());
-    if (HealthComponent)
+void UDSPlayerHUDWidget::OnNewPawn(APawn* NewPawn)
+{
+      const auto HealthComponent = DSUtils::GetDSPlayerComponent<UDSHealthComponent>(NewPawn);
+    if (HealthComponent && !HealthComponent->OnHealthChanged.IsBoundToObject(this))
     {
         HealthComponent->OnHealthChanged.AddUObject(this, &UDSPlayerHUDWidget::OnHealthChanged);
     }
-    return Super::Initialize();
+   
 }
 
 

@@ -24,7 +24,11 @@ AActor* UDSAIPerceptionComponent::GetClosestEnemy() const
     for (const auto PercieveActor : PercieveActors)
     {
         const auto HealthComponent = DSUtils::GetDSPlayerComponent<UDSHealthComponent>(PercieveActor);
-        if (HealthComponent && !HealthComponent->IsDead()) // проверить враг или нет
+
+        const auto PercievePawn = Cast<APawn>(PercieveActor);
+        const auto AreEnemies = PercievePawn && DSUtils::AreEnemies(Controller, PercievePawn->Controller);
+
+        if (HealthComponent && !HealthComponent->IsDead() && AreEnemies) // проверить враг или нет
         {
             const auto CurrentDistance = (PercieveActor->GetActorLocation() - Pawn->GetActorLocation()).Size();
             if (CurrentDistance < BestDistance)
