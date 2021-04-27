@@ -5,14 +5,14 @@
 #include "Components/DSWeaponComponent.h"
 #include "DSUtils.h"
 
-bool UDSPlayerHUDWidget::Initialize() 
+void UDSPlayerHUDWidget::NativeOnInitialized()
 {
+    Super::NativeOnInitialized();
     if(GetOwningPlayer())
     {
         GetOwningPlayer()->GetOnNewPawnNotifier().AddUObject(this, &UDSPlayerHUDWidget::OnNewPawn);
         OnNewPawn(GetOwningPlayerPawn());
     }
-    return Super::Initialize();
 }
 
 void UDSPlayerHUDWidget::OnNewPawn(APawn* NewPawn)

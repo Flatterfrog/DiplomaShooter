@@ -29,6 +29,8 @@ void ADSGameModeBase::StartPlay()
 
     CurrentRound = 1;
     StartRound();
+
+    SetMatchState(EDSMatchState::InProgress);
 }
 
 UClass* ADSGameModeBase::GetDefaultPawnClassForController_Implementation(AController* InController)
@@ -115,6 +117,7 @@ void ADSGameModeBase::CreateTeamsInfo()
 
         PlayerState->SetTeamID(TeamID);
         PlayerState->SetTeamColor(DetermineColorByTeamID(TeamID));
+        PlayerState->SetPlayerName(Controller->IsPlayerController() ? "Player" : "Bot");
         SetPlayerColor(Controller);
 
         TeamID = TeamID == 1 ? 2 : 1;
@@ -183,4 +186,36 @@ void ADSGameModeBase::GameOver()
             Pawn->DisableInput(nullptr);
         }
     }
+
+    SetMatchState(EDSMatchState::GameOver);
+}
+
+void ADSGameModeBase::SetMatchState(EDSMatchState State) 
+{
+    if (MatchState == State) return;
+
+    MatchState = State;
+    OnMatchStateChanged.Broadcast(MatchState);
+}
+
+bool ADSGameModeBase::SetPause(APlayerController* PC, FCanUnpause CanUnpauseDelegate)
+{
+    const auto PauseSet = Super::SetPause(PC, CanUnpauseDelegate);
+
+    if (PauseSet)
+    {
+        SetMatchState(EDSMatchState::Pause);
+    }
+    
+    return PauseSet;
+}
+
+bool ADSGameModeBase::ClearPause() 
+{
+    const auto PauseCleared = Super::ClearPause();
+    if (PauseCleared)
+    {
+        SetMatchState(EDSMatchState::InProgress);
+    }
+    return PauseCleared;
 }

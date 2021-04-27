@@ -22,7 +22,7 @@ public:
     int32 GetKillsNum() const {return KillsNum;}
 
     void AddDeath() {++DeathsNum;}
-    int32 GetDeathNum() const {return DeathsNum;}
+    int32 GetDeathsNum() const {return DeathsNum;}
 
 private:
     int32 TeamID;

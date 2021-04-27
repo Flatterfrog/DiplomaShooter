@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "DSCoreTypes.h"
 #include "DSPlayerController.generated.h"
 
 class UDSRespawnComponent;
@@ -11,15 +12,20 @@ class UDSRespawnComponent;
 UCLASS()
 class DIPLOMASHOOTER_API ADSPlayerController : public APlayerController
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
-		public:
+public:
     ADSPlayerController();
 
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     UDSRespawnComponent* RespawnComponent;
-	
 
-	virtual void OnPossess(APawn* InPawn) override;
+    virtual void BeginPlay() override;
+    virtual void OnPossess(APawn* InPawn) override;
+    virtual void SetupInputComponent() override;
+
+private:
+    void OnPauseGame();
+    void OnMatchStateChanged(EDSMatchState State);
 };
