@@ -4,6 +4,7 @@
 #include "Components/DSHealthComponent.h"
 #include "Components/DSWeaponComponent.h"
 #include "DSUtils.h"
+#include "Components/ProgressBar.h"
 
 void UDSPlayerHUDWidget::NativeOnInitialized()
 {
@@ -13,6 +14,7 @@ void UDSPlayerHUDWidget::NativeOnInitialized()
         GetOwningPlayer()->GetOnNewPawnNotifier().AddUObject(this, &UDSPlayerHUDWidget::OnNewPawn);
         OnNewPawn(GetOwningPlayerPawn());
     }
+    UpdateHealthBar();
 }
 
 void UDSPlayerHUDWidget::OnNewPawn(APawn* NewPawn)
@@ -34,6 +36,7 @@ void UDSPlayerHUDWidget::OnHealthChanged(float Health, float HealthDelta)
 
         OnTakeDamage();
     }
+    UpdateHealthBar();
 }
 
 float UDSPlayerHUDWidget::GetHealthPercent() const
@@ -75,3 +78,10 @@ bool UDSPlayerHUDWidget::IsPlayerSpectating() const
 
 }
 
+void UDSPlayerHUDWidget::UpdateHealthBar()
+{
+    if (HealthProgressBar)
+    {
+        HealthProgressBar->SetFillColorAndOpacity(GetHealthPercent() > PercentColorThreshold ? GoodColor : BadColor);
+    }
+}

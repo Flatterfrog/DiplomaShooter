@@ -58,6 +58,7 @@ void UDSGameOverWidget::UpdatePlayersStat()
         PlayerStatRawWidget->SetDeaths(DSUtils::TextFromInt(PlayerState->GetDeathsNum()));
         PlayerStatRawWidget->SetTeam(DSUtils::TextFromInt(PlayerState->GetTeamID()));
         PlayerStatRawWidget->SetPlayerIndicatorVisibility(Controller->IsPlayerController());
+        PlayerStatRawWidget->SetTeamColor(PlayerState->GetTeamColor());
 
         PlayerStatBox->AddChild(PlayerStatRawWidget);
     }

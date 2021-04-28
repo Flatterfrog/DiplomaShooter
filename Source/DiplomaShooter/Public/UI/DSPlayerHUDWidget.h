@@ -7,6 +7,7 @@
 #include "DSCoreTypes.h"
 #include "DSPlayerHUDWidget.generated.h"
 
+class UProgressBar;
 
 UCLASS()
 class DIPLOMASHOOTER_API UDSPlayerHUDWidget : public UUserWidget
@@ -34,9 +35,23 @@ class DIPLOMASHOOTER_API UDSPlayerHUDWidget : public UUserWidget
 	void OnTakeDamage();
 
 	protected:
+    UPROPERTY(meta = (BindWidget))
+    UProgressBar* HealthProgressBar;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    float PercentColorThreshold = 0.3f;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    FLinearColor GoodColor = FLinearColor::White;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    FLinearColor BadColor = FLinearColor::Red;
+
+
     virtual void NativeOnInitialized() override;
 
 	private:
     void OnHealthChanged(float Health, float HealthDelta);
 	void OnNewPawn(APawn* NewPawn);
+    void UpdateHealthBar();
 };

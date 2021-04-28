@@ -35,3 +35,9 @@ void UDSPlayerStatRawWidget::SetPlayerIndicatorVisibility(bool Visible)
     if (!PlayerIndicatorImage) return;
     PlayerIndicatorImage->SetVisibility(Visible ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 }
+
+void UDSPlayerStatRawWidget::SetTeamColor(const FLinearColor& Color)
+{
+    if (!TeamImage) return;
+    TeamImage->SetColorAndOpacity(Color);
+}

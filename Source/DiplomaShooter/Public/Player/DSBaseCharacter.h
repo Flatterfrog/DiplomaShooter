@@ -21,11 +21,8 @@ public:
 
 protected:
 
-
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     UDSHealthComponent* HealthComponent;
-
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     UDSWeaponComponent* WeaponComponent;
@@ -47,12 +44,12 @@ protected:
 
 	virtual void BeginPlay() override;
     virtual void OnDeath();
+    virtual void OnHealthChanged(float Health, float HealthDelta);
 
 public:	
 
 	virtual void Tick(float DeltaTime) override;
 	
-
 	UFUNCTION(BlueprintCallable, Category = "Movement")
     virtual bool IsRunning() const;
 
@@ -61,13 +58,8 @@ public:
 
 	void SetPlayerColor(const FLinearColor& Color);
 
-	private:
-
-
-	
-    void OnHealthChanged(float Health, float HealthDelta);
+private:
 
     UFUNCTION()
     void OnGroundLanded(const FHitResult& Hit);
-
 };
