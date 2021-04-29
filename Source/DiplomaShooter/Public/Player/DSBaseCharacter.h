@@ -9,6 +9,7 @@
 
 class UDSHealthComponent;
 class UDSWeaponComponent;
+class USoundCue;
 
 UCLASS()
 class DIPLOMASHOOTER_API ADSBaseCharacter : public ACharacter
@@ -41,6 +42,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Material")
     FName MaterialColorName = "Paint Color";
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
+    USoundCue* DeathSound;
 
 	virtual void BeginPlay() override;
     virtual void OnDeath();

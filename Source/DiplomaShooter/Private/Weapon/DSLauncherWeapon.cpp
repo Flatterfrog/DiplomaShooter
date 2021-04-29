@@ -4,14 +4,22 @@
 #include "Weapon/DSLauncherWeapon.h"
 #include "Weapon/DSProjectile.h"
 #include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 
-void ADSLauncherWeapon::StartFire() {
+void ADSLauncherWeapon::StartFire() 
+{
     MakeShot();
 }
 
 void ADSLauncherWeapon::MakeShot() 
 {
-    if (!GetWorld() || IsAmmoEmpty()) return;
+    if (!GetWorld()) return;
+
+    if (IsAmmoEmpty())
+    {
+        UGameplayStatics::SpawnSoundAtLocation(GetWorld(), NoAmmoSound, GetActorLocation());
+        return;
+    }
 
     FVector TraceStart, TraceEnd;
     if (!GetTraceData(TraceStart, TraceEnd)) return;
@@ -31,4 +39,5 @@ void ADSLauncherWeapon::MakeShot()
         Projectile->FinishSpawning(SpawnTransform);
     }
     DecreaseAmmo();
+    UGameplayStatics::SpawnSoundAttached(FireSound, WeaponMesh, MuzzleSocketName);
 }

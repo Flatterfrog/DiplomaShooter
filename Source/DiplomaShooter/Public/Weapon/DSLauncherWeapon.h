@@ -7,6 +7,7 @@
 #include "DSLauncherWeapon.generated.h"
 
 class ADSProjectile;
+class USoundCue;
 
 UCLASS()
 class DIPLOMASHOOTER_API ADSLauncherWeapon : public ADSBaseWeapon
@@ -20,7 +21,8 @@ class DIPLOMASHOOTER_API ADSLauncherWeapon : public ADSBaseWeapon
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
     TSubclassOf<ADSProjectile> ProjectileClass;
 
-
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
+    USoundCue* NoAmmoSound;
 
     virtual void MakeShot() override;
 };

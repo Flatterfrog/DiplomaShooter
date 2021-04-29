@@ -7,9 +7,10 @@
 #include "DSCoreTypes.h"
 #include "DSBaseWeapon.generated.h"
 
-
-
 class USkeletalMeshComponent;
+class USoundCue;
+class UNiagaraComponent;
+class UNiagaraSystem;
 
 UCLASS()
 class DIPLOMASHOOTER_API ADSBaseWeapon : public AActor
@@ -48,6 +49,12 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
     FWeaponUIData UIData;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
+    UNiagaraSystem* MuzzleFX;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
+    USoundCue* FireSound;
+
     virtual void BeginPlay() override;
 
     virtual void MakeShot();
@@ -63,6 +70,8 @@ protected:
     bool IsClipEmpty() const;
 
     void LogAmmo();
+
+    UNiagaraComponent* SpawnMuzzleFX();
 
     private:
     FAmmoData CurrentAmmo;

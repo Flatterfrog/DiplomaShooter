@@ -27,3 +27,4 @@ void UDSWeaponFXComponent::PlayImpactFX(const FHitResult& Hit)
 
     UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), Effect, Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
 }
+

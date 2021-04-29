@@ -8,6 +8,8 @@
 
 class UDSWeaponFXComponent;
 class UNiagaraSystem;
+class UAudioComponent;
+class UNiagaraComponent;
 
 UCLASS()
 class DIPLOMASHOOTER_API ADSRifleWeapon : public ADSBaseWeapon
@@ -46,7 +48,15 @@ protected:
 private:
     FTimerHandle ShotTimerHandle;
 
+    UPROPERTY()
+    UNiagaraComponent* MuzzleFXComponent;
+
+    UPROPERTY()
+    UAudioComponent* FireAudioComponent;
+
     void MakeDamage(const FHitResult& HitResult);
+    void InitFX();
+    void SetFXActive(bool IsActive);
     void SpawnTraceFX(const FVector& TraceStart, const FVector& TraceEnd);
     AController* GetController() const;
 };

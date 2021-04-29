@@ -1,19 +1,21 @@
 // Diploma Shooter. Made by Viktor Polyakov IT-5
 
-
 #include "Weapon/DSRifleWeapon.h"
 #include "Engine/World.h"
 #include "DrawDebugHelpers.h"
 #include "Weapon/Components/DSWeaponFXComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
+#include "Components/AudioComponent.h"
 
-ADSRifleWeapon::ADSRifleWeapon() 
+ADSRifleWeapon::ADSRifleWeapon()
 {
     WeaponFXComponent = CreateDefaultSubobject<UDSWeaponFXComponent>("WeaponFXComponent");
 }
 
-void ADSRifleWeapon::BeginPlay() 
+void ADSRifleWeapon::BeginPlay()
 {
     Super::BeginPlay();
 
@@ -22,14 +24,14 @@ void ADSRifleWeapon::BeginPlay()
 
 void ADSRifleWeapon::StartFire()
 {
+    InitFX();
     GetWorldTimerManager().SetTimer(ShotTimerHandle, this, &ADSRifleWeapon::MakeShot, TimeBetweenShots, true);
     MakeShot();
-    
 }
 void ADSRifleWeapon::StopFire()
 {
-
     GetWorldTimerManager().ClearTimer(ShotTimerHandle);
+    SetFXActive(false);
 }
 
 void ADSRifleWeapon::MakeShot()
@@ -39,7 +41,6 @@ void ADSRifleWeapon::MakeShot()
         StopFire();
         return;
     }
-    
 
     FVector TraceStart, TraceEnd;
     if (!GetTraceData(TraceStart, TraceEnd))
@@ -47,7 +48,7 @@ void ADSRifleWeapon::MakeShot()
         StopFire();
         return;
     }
-    
+
     FHitResult HitResult;
     MakeHit(HitResult, TraceStart, TraceEnd);
 
@@ -75,7 +76,6 @@ bool ADSRifleWeapon::GetTraceData(FVector& TraceStart, FVector& TraceEnd) const
     return true;
 }
 
- 
 void ADSRifleWeapon::MakeDamage(const FHitResult& HitResult)
 {
     const auto DamagedActor = HitResult.GetActor();
@@ -84,7 +84,7 @@ void ADSRifleWeapon::MakeDamage(const FHitResult& HitResult)
     DamagedActor->TakeDamage(DamageAmount, FDamageEvent(), GetController(), this);
 }
 
-void ADSRifleWeapon::SpawnTraceFX(const FVector& TraceStart, const FVector& TraceEnd) 
+void ADSRifleWeapon::SpawnTraceFX(const FVector& TraceStart, const FVector& TraceEnd)
 {
     const auto TraceFXComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), TraceFX, TraceStart);
 
@@ -94,8 +94,33 @@ void ADSRifleWeapon::SpawnTraceFX(const FVector& TraceStart, const FVector& Trac
     }
 }
 
-    AController* ADSRifleWeapon::GetController() const 
+AController* ADSRifleWeapon::GetController() const
+{
+    const auto Pawn = Cast<APawn>(GetOwner());
+    return Pawn ? Pawn->GetController() : nullptr;
+}
+
+void ADSRifleWeapon::InitFX() 
+{
+    if (!MuzzleFXComponent)
     {
-        const auto Pawn = Cast<APawn>(GetOwner());
-        return Pawn ? Pawn->GetController() : nullptr;
+        MuzzleFXComponent = SpawnMuzzleFX();
     }
+    if (!FireAudioComponent)
+    {
+        FireAudioComponent = UGameplayStatics::SpawnSoundAttached(FireSound, WeaponMesh, MuzzleSocketName);
+    }
+    SetFXActive(true);
+}
+void ADSRifleWeapon::SetFXActive(bool IsActive) 
+{
+    if (MuzzleFXComponent)
+    {
+        MuzzleFXComponent->SetPaused(!IsActive);
+        MuzzleFXComponent->SetVisibility(IsActive, true);
+    }
+    if (FireAudioComponent)
+    {
+        IsActive ? FireAudioComponent->Play() : FireAudioComponent->Stop();
+    }
+}

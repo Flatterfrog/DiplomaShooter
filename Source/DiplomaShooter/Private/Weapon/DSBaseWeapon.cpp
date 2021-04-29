@@ -5,8 +5,10 @@
 #include "Engine/World.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/Character.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
-// Sets default values
+
 ADSBaseWeapon::ADSBaseWeapon()
 {
     PrimaryActorTick.bCanEverTick = false;
@@ -132,4 +134,14 @@ void ADSBaseWeapon::LogAmmo()
     FString AmmoInfo = "Ammo: " + FString::FromInt(CurrentAmmo.Bullets) + " / ";
     AmmoInfo += CurrentAmmo.Infinite ? "Infinite" : FString::FromInt(CurrentAmmo.Clips);
     UE_LOG(LogTemp, Display, TEXT("%s"), *AmmoInfo);
+}
+
+UNiagaraComponent* ADSBaseWeapon::SpawnMuzzleFX()
+{
+    return UNiagaraFunctionLibrary::SpawnSystemAttached(MuzzleFX,  //
+        WeaponMesh,                                                //
+        MuzzleSocketName,                                          //
+        FVector::ZeroVector,                                       //
+        FRotator::ZeroRotator,                                     //
+        EAttachLocation::SnapToTarget, true);
 }
